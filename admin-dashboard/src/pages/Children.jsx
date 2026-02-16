@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseAdmin } from '../lib/supabase';
 import { Search, Star, Zap } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,88 +19,8 @@ export default function Children() {
 
   const fetchChildren = async () => {
     try {
-      // Mock data for demonstration
-      const mockChildren = [
-        {
-          id: '1',
-          child_name: 'Emma Johnson',
-          age: 7,
-          created_at: '2024-01-15T10:30:00Z',
-          accounts: { parent_first_name: 'Sarah', parent_last_name: 'Johnson', email: 'sarah.johnson@email.com' },
-          game_progress: [{ total_xp: 1250, current_level: 8, total_stars: 45 }],
-        },
-        {
-          id: '2',
-          child_name: 'Liam Johnson',
-          age: 5,
-          created_at: '2024-01-15T10:30:00Z',
-          accounts: { parent_first_name: 'Sarah', parent_last_name: 'Johnson', email: 'sarah.johnson@email.com' },
-          game_progress: [{ total_xp: 680, current_level: 5, total_stars: 28 }],
-        },
-        {
-          id: '3',
-          child_name: 'Sophia Chen',
-          age: 6,
-          created_at: '2024-01-20T14:22:00Z',
-          accounts: { parent_first_name: 'Michael', parent_last_name: 'Chen', email: 'michael.chen@email.com' },
-          game_progress: [{ total_xp: 2100, current_level: 12, total_stars: 67 }],
-        },
-        {
-          id: '4',
-          child_name: 'Noah Williams',
-          age: 8,
-          created_at: '2024-02-01T09:15:00Z',
-          accounts: { parent_first_name: 'Emma', parent_last_name: 'Williams', email: 'emma.williams@email.com' },
-          game_progress: [{ total_xp: 1890, current_level: 11, total_stars: 58 }],
-        },
-        {
-          id: '5',
-          child_name: 'Olivia Williams',
-          age: 6,
-          created_at: '2024-02-01T09:15:00Z',
-          accounts: { parent_first_name: 'Emma', parent_last_name: 'Williams', email: 'emma.williams@email.com' },
-          game_progress: [{ total_xp: 950, current_level: 7, total_stars: 38 }],
-        },
-        {
-          id: '6',
-          child_name: 'Ava Williams',
-          age: 5,
-          created_at: '2024-02-01T09:15:00Z',
-          accounts: { parent_first_name: 'Emma', parent_last_name: 'Williams', email: 'emma.williams@email.com' },
-          game_progress: [{ total_xp: 420, current_level: 4, total_stars: 19 }],
-        },
-        {
-          id: '7',
-          child_name: 'Lucas Martinez',
-          age: 7,
-          created_at: '2024-02-03T16:45:00Z',
-          accounts: { parent_first_name: 'David', parent_last_name: 'Martinez', email: 'david.martinez@email.com' },
-          game_progress: [{ total_xp: 1560, current_level: 9, total_stars: 52 }],
-        },
-        {
-          id: '8',
-          child_name: 'Mia Anderson',
-          age: 6,
-          created_at: '2024-02-05T11:20:00Z',
-          accounts: { parent_first_name: 'Lisa', parent_last_name: 'Anderson', email: 'lisa.anderson@email.com' },
-          game_progress: [{ total_xp: 1120, current_level: 8, total_stars: 41 }],
-        },
-        {
-          id: '9',
-          child_name: 'Ethan Anderson',
-          age: 8,
-          created_at: '2024-02-05T11:20:00Z',
-          accounts: { parent_first_name: 'Lisa', parent_last_name: 'Anderson', email: 'lisa.anderson@email.com' },
-          game_progress: [{ total_xp: 2450, current_level: 14, total_stars: 78 }],
-        },
-      ];
-
-      setChildren(mockChildren);
-      setLoading(false);
-
-      // Uncomment below to use real Supabase data
-      /*
-      const { data, error } = await supabase
+      const client = supabaseAdmin || supabase;
+      const { data, error } = await client
         .from('children')
         .select(`
           *,
@@ -111,10 +31,9 @@ export default function Children() {
 
       if (error) throw error;
       setChildren(data || []);
-      setLoading(false);
-      */
     } catch (error) {
       console.error('Error fetching children:', error);
+    } finally {
       setLoading(false);
     }
   };

@@ -1,5 +1,5 @@
 import { useState, useEffect, Fragment } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseAdmin } from '../lib/supabase';
 import { Search, ChevronDown, ChevronRight, Star, Zap, Plus, UserPlus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -41,80 +41,17 @@ export default function Users() {
 
   const fetchUsers = async () => {
     try {
-      // Mock data for demonstration
-      const mockUsers = [
-        {
-          id: '1',
-          email: 'sarah.johnson@email.com',
-          parent_first_name: 'Sarah',
-          parent_last_name: 'Johnson',
-          created_at: '2024-01-15T10:30:00Z',
-          children_list: [
-            { id: 'c1', child_name: 'Emma Johnson', age: 7, game_progress: [{ total_xp: 1250, current_level: 8, total_stars: 45 }] },
-            { id: 'c2', child_name: 'Liam Johnson', age: 5, game_progress: [{ total_xp: 680, current_level: 5, total_stars: 28 }] },
-          ],
-        },
-        {
-          id: '2',
-          email: 'michael.chen@email.com',
-          parent_first_name: 'Michael',
-          parent_last_name: 'Chen',
-          created_at: '2024-01-20T14:22:00Z',
-          children_list: [
-            { id: 'c3', child_name: 'Sophia Chen', age: 6, game_progress: [{ total_xp: 2100, current_level: 12, total_stars: 67 }] },
-          ],
-        },
-        {
-          id: '3',
-          email: 'emma.williams@email.com',
-          parent_first_name: 'Emma',
-          parent_last_name: 'Williams',
-          created_at: '2024-02-01T09:15:00Z',
-          children_list: [
-            { id: 'c4', child_name: 'Noah Williams', age: 8, game_progress: [{ total_xp: 1890, current_level: 11, total_stars: 58 }] },
-            { id: 'c5', child_name: 'Olivia Williams', age: 6, game_progress: [{ total_xp: 950, current_level: 7, total_stars: 38 }] },
-            { id: 'c6', child_name: 'Ava Williams', age: 5, game_progress: [{ total_xp: 420, current_level: 4, total_stars: 19 }] },
-          ],
-        },
-        {
-          id: '4',
-          email: 'david.martinez@email.com',
-          parent_first_name: 'David',
-          parent_last_name: 'Martinez',
-          created_at: '2024-02-03T16:45:00Z',
-          children_list: [
-            { id: 'c7', child_name: 'Lucas Martinez', age: 7, game_progress: [{ total_xp: 1560, current_level: 9, total_stars: 52 }] },
-          ],
-        },
-        {
-          id: '5',
-          email: 'lisa.anderson@email.com',
-          parent_first_name: 'Lisa',
-          parent_last_name: 'Anderson',
-          created_at: '2024-02-05T11:20:00Z',
-          children_list: [
-            { id: 'c8', child_name: 'Mia Anderson', age: 6, game_progress: [{ total_xp: 1120, current_level: 8, total_stars: 41 }] },
-            { id: 'c9', child_name: 'Ethan Anderson', age: 8, game_progress: [{ total_xp: 2450, current_level: 14, total_stars: 78 }] },
-          ],
-        },
-      ];
-
-      setUsers(mockUsers);
-      setLoading(false);
-
-      // Uncomment below to use real Supabase data
-      /*
-      const { data, error } = await supabase
+      const client = supabaseAdmin || supabase;
+      const { data, error } = await client
         .from('accounts')
         .select('*, children_list:children(*, game_progress(total_xp, current_level, total_stars))')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       setUsers(data || []);
-      setLoading(false);
-      */
     } catch (error) {
       console.error('Error fetching users:', error);
+    } finally {
       setLoading(false);
     }
   };
@@ -135,21 +72,10 @@ export default function Users() {
 
     setAddParentLoading(true);
     try {
-      // Mock: add to local state
-      const mockId = crypto.randomUUID();
-      setUsers(prev => [{
-        id: mockId,
-        email: newParent.email,
-        parent_first_name: newParent.parent_first_name,
-        parent_last_name: newParent.parent_last_name,
-        created_at: new Date().toISOString(),
-        children_list: [],
-      }, ...prev]);
+      if (!supabaseAdmin) throw new Error('Service role key is required to create users. Add VITE_SUPABASE_SERVICE_ROLE_KEY to your .env file.');
 
-      // Uncomment below for real Supabase integration
-      /*
       // 1. Create auth user
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email: newParent.email,
         password: newParent.password,
         email_confirm: true,
@@ -157,7 +83,7 @@ export default function Users() {
       if (authError) throw authError;
 
       // 2. Insert account row
-      const { error: insertError } = await supabase
+      const { error: insertError } = await supabaseAdmin
         .from('accounts')
         .insert({
           id: authData.user.id,
@@ -169,7 +95,6 @@ export default function Users() {
 
       // 3. Refresh list
       await fetchUsers();
-      */
 
       setShowAddParent(false);
       setNewParent({ parent_first_name: '', parent_last_name: '', email: '', password: '' });
@@ -205,27 +130,8 @@ export default function Users() {
 
     setAddChildLoading(true);
     try {
-      // Mock: add to local state
-      const mockChildId = crypto.randomUUID();
-      setUsers(prev => prev.map(user => {
-        if (user.id !== addChildParentId) return user;
-        return {
-          ...user,
-          children_list: [
-            ...user.children_list,
-            {
-              id: mockChildId,
-              child_name: newChild.child_name,
-              age: newChild.age ? parseInt(newChild.age) : null,
-              game_progress: [{ total_xp: 0, current_level: 1, total_stars: 0 }],
-            },
-          ],
-        };
-      }));
-
-      // Uncomment below for real Supabase integration
-      /*
-      const { error } = await supabase
+      const client = supabaseAdmin || supabase;
+      const { error } = await client
         .from('children')
         .insert({
           account_id: addChildParentId,
@@ -235,7 +141,6 @@ export default function Users() {
       if (error) throw error;
 
       await fetchUsers();
-      */
 
       setShowAddChild(false);
       setNewChild({ child_name: '', age: '' });
