@@ -13,13 +13,15 @@ dependencies:
   # onnxruntime: ^1.0.0       # Uncomment for ONNX Runtime
   # Storage
   shared_preferences: ^2.2.0
-  sqflite: ^2.3.0
   # State Management
   provider: ^6.1.0
   # UI
   cupertino_icons: ^1.0.6
-  # Optional: Cloud sync
-  # http: ^1.1.0
+  google_fonts: ^6.1.0
+  # Cloud sync & API calls
+  http: ^1.1.0
+  # Audio
+  audioplayers: ^6.0.0
 
 dev_dependencies:
   flutter_test:

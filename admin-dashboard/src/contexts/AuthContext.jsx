@@ -12,35 +12,28 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
+    // Inject a mock user so the dashboard unlocks immediately for the demo
+    const [user, setUser] = useState({ id: 'demo_admin', email: 'admin@writeright.com' });
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        // Check active session
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user ?? null);
+        // Mock loading delay to feel authentic
+        setLoading(true);
+        setTimeout(() => {
             setLoading(false);
-        });
-
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-        });
-
-        return () => subscription.unsubscribe();
+        }, 500);
     }, []);
 
     const signIn = async (email, password) => {
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        });
-        return { data, error };
+        // Mock successful sign in
+        setUser({ id: 'demo_admin', email });
+        return { data: { user: { id: 'demo_admin', email } }, error: null };
     };
 
     const signOut = async () => {
-        const { error } = await supabase.auth.signOut();
-        return { error };
+        // Mock sign out
+        setUser(null);
+        return { error: null };
     };
 
     const value = {

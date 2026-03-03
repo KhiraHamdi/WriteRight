@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, supabaseAdmin } from '../lib/supabase';
+import { mockChildren } from '../lib/mockData';
 import { Search, Star, Zap } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,18 +19,8 @@ export default function Children() {
 
   const fetchChildren = async () => {
     try {
-      const client = supabaseAdmin || supabase;
-      const { data, error } = await client
-        .from('children')
-        .select(`
-          *,
-          accounts(parent_first_name, parent_last_name, email),
-          game_progress(total_xp, current_level, total_stars)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setChildren(data || []);
+      // Use mock data
+      setChildren(mockChildren || []);
     } catch (error) {
       console.error('Error fetching children:', error);
     } finally {

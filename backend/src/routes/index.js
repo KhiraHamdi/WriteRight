@@ -1,7 +1,9 @@
 import express from 'express';
+import authRoutes from './auth.js';
 import childrenRoutes from './children.js';
 import practiceRoutes from './practice.js';
 import progressRoutes from './progress.js';
+import adminRoutes from './admin.js';
 
 const router = express.Router();
 
@@ -15,8 +17,10 @@ router.get('/health', (req, res) => {
 });
 
 // API routes
+router.use('/auth', authRoutes);
 router.use('/children', childrenRoutes);
 router.use('/practice', practiceRoutes);
 router.use('/progress', progressRoutes);
+router.use('/admin', adminRoutes);
 
 export default router;

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { mockParents, mockChildren, mockSessions, mockMastery } from '../lib/mockData';
 import StatCard from '../components/StatCard';
 import { Users, GraduationCap, TrendingUp, Award } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,53 +26,11 @@ export default function Dashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // Mock data for demonstration
-      const mockStats = {
-        totalUsers: 45,
-        totalChildren: 78,
-        totalSessions: 1247,
-        avgScore: 87.3,
-      };
-
-      const mockSessionData = [
-        { date: 'Feb 2', sessions: 45, avgScore: '85.2' },
-        { date: 'Feb 3', sessions: 52, avgScore: '86.7' },
-        { date: 'Feb 4', sessions: 38, avgScore: '84.1' },
-        { date: 'Feb 5', sessions: 61, avgScore: '88.9' },
-        { date: 'Feb 6', sessions: 55, avgScore: '87.5' },
-        { date: 'Feb 7', sessions: 48, avgScore: '86.3' },
-        { date: 'Feb 8', sessions: 67, avgScore: '89.2' },
-      ];
-
-      const mockMasteryData = [
-        { level: 'Beginner', count: 145 },
-        { level: 'Intermediate', count: 98 },
-        { level: 'Advanced', count: 67 },
-        { level: 'Master', count: 34 },
-      ];
-
-      setStats(mockStats);
-      setSessionData(mockSessionData);
-      setMasteryData(mockMasteryData);
-      setLoading(false);
-
-      // Uncomment below to use real Supabase data
-      /*
-      const { count: accountCount } = await supabase
-        .from('accounts')
-        .select('*', { count: 'exact', head: true });
-
-      const { count: childrenCount } = await supabase
-        .from('children')
-        .select('*', { count: 'exact', head: true });
-
-      const { count: sessionsCount } = await supabase
-        .from('practice_sessions')
-        .select('*', { count: 'exact', head: true });
-
-      const { data: sessions } = await supabase
-        .from('practice_sessions')
-        .select('score');
+      // Use mock data instead of Supabase
+      const accountCount = mockParents.length;
+      const childrenCount = mockChildren.length;
+      const sessionsCount = mockSessions.length;
+      const sessions = mockSessions;
 
       const avgScore = sessions && sessions.length > 0
         ? sessions.reduce((sum, s) => sum + parseFloat(s.score), 0) / sessions.length
@@ -88,11 +46,9 @@ export default function Dashboard() {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-      const { data: recentSessions } = await supabase
-        .from('practice_sessions')
-        .select('session_date, score')
-        .gte('session_date', sevenDaysAgo.toISOString())
-        .order('session_date', { ascending: true });
+      const recentSessions = mockSessions.filter(
+        session => new Date(session.session_date) >= sevenDaysAgo
+      ).sort((a, b) => new Date(a.session_date) - new Date(b.session_date));
 
       const sessionsByDate = {};
       recentSessions?.forEach(session => {
@@ -112,13 +68,9 @@ export default function Dashboard() {
 
       setSessionData(chartData);
 
-      const { data: masteryLevels } = await supabase
-        .from('character_mastery')
-        .select('mastery_level');
-
       const masteryCount = { beginner: 0, intermediate: 0, advanced: 0, master: 0 };
-      masteryLevels?.forEach(m => {
-        masteryCount[m.mastery_level]++;
+      mockMastery?.forEach(m => {
+        masteryCount[m]++;
       });
 
       const masteryChartData = Object.entries(masteryCount).map(([level, count]) => ({
@@ -128,7 +80,6 @@ export default function Dashboard() {
 
       setMasteryData(masteryChartData);
       setLoading(false);
-      */
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       setLoading(false);

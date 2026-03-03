@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { mockSessions, mockChildren } from '../lib/mockData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -22,49 +22,9 @@ export default function Analytics() {
 
   const fetchAnalytics = async () => {
     try {
-      // Mock data for demonstration
-      const mockTypeData = [
-        { name: 'Letters', value: 782 },
-        { name: 'Numbers', value: 465 },
-      ];
-
-      const mockTopPerformers = [
-        { child_name: 'Ethan Anderson', game_progress: [{ total_xp: 2450, current_level: 14 }] },
-        { child_name: 'Sophia Chen', game_progress: [{ total_xp: 2100, current_level: 12 }] },
-        { child_name: 'Noah Williams', game_progress: [{ total_xp: 1890, current_level: 11 }] },
-        { child_name: 'Lucas Martinez', game_progress: [{ total_xp: 1560, current_level: 9 }] },
-        { child_name: 'Emma Johnson', game_progress: [{ total_xp: 1250, current_level: 8 }] },
-      ];
-
-      const mockAvgScoreData = [
-        { character: 'A', avgScore: '92.5' },
-        { character: 'E', avgScore: '91.2' },
-        { character: 'O', avgScore: '89.8' },
-        { character: 'I', avgScore: '88.4' },
-        { character: '5', avgScore: '87.9' },
-        { character: 'T', avgScore: '86.7' },
-        { character: '3', avgScore: '85.3' },
-        { character: 'S', avgScore: '84.1' },
-        { character: '7', avgScore: '83.6' },
-        { character: 'N', avgScore: '82.8' },
-      ];
-
-      setAnalytics({
-        characterTypeDistribution: mockTypeData,
-        topPerformers: mockTopPerformers,
-        averageScoreByCharacter: mockAvgScoreData,
-      });
-
-      setLoading(false);
-
-      // Uncomment below to use real Supabase data
-      /*
-      const { data: sessions } = await supabase
-        .from('practice_sessions')
-        .select('character_type');
-
+      // Use mock data
       const typeCount = { letter: 0, number: 0 };
-      sessions?.forEach(s => {
+      mockSessions?.forEach(s => {
         typeCount[s.character_type]++;
       });
 
@@ -73,21 +33,12 @@ export default function Analytics() {
         { name: 'Numbers', value: typeCount.number },
       ];
 
-      const { data: children } = await supabase
-        .from('children')
-        .select(`
-          child_name,
-          game_progress(total_xp, current_level)
-        `)
-        .order('game_progress(total_xp)', { ascending: false })
-        .limit(5);
-
-      const { data: allSessions } = await supabase
-        .from('practice_sessions')
-        .select('character_value, score');
+      const children = [...mockChildren]
+        .sort((a, b) => (b.game_progress?.[0]?.total_xp || 0) - (a.game_progress?.[0]?.total_xp || 0))
+        .slice(0, 5);
 
       const scoresByCharacter = {};
-      allSessions?.forEach(s => {
+      mockSessions?.forEach(s => {
         if (!scoresByCharacter[s.character_value]) {
           scoresByCharacter[s.character_value] = { total: 0, count: 0 };
         }
@@ -110,7 +61,6 @@ export default function Analytics() {
       });
 
       setLoading(false);
-      */
     } catch (error) {
       console.error('Error fetching analytics:', error);
       setLoading(false);

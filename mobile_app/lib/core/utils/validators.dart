@@ -1,2 +1,0 @@
-// Input validators
-class Validators {}

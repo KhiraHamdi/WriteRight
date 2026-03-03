@@ -37,7 +37,8 @@ app.get('/', (req, res) => {
             health: `/api/${config.apiVersion}/health`,
             children: `/api/${config.apiVersion}/children`,
             practice: `/api/${config.apiVersion}/practice`,
-            progress: `/api/${config.apiVersion}/progress`
+            progress: `/api/${config.apiVersion}/progress`,
+            admin: `/api/${config.apiVersion}/admin`
         }
     });
 });
