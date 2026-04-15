@@ -94,24 +94,6 @@ class HomeScreen extends StatelessWidget {
 
                 const SizedBox(height: 12),
 
-                // ✅ Level 2 button
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const WordSelectionScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Text('✏️', style: TextStyle(fontSize: 22)),
-                    label: const Text('Level 2 — Simple Words'),
-                  ),
-                ),
-
                 const SizedBox(height: 16),
 
                 const Spacer(flex: 1),

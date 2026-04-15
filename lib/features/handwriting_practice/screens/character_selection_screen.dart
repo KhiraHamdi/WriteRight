@@ -5,6 +5,7 @@ import '../../../core/constants/buddy_data.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../services/gamification/gamification_service.dart';
 import 'practice_screen.dart';
+import 'word_selection_screen.dart';
 
 class CharacterSelectionScreen extends StatelessWidget {
   const CharacterSelectionScreen({super.key});
@@ -28,6 +29,101 @@ class CharacterSelectionScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Choose a Letter'),
+        actions: [
+          // Level 2 button — top right of AppBar
+          Consumer<GamificationService>(
+            builder: (context, gam, _) {
+              // Count how many letters have been practiced (stars > 0)
+              final practiced = _characters
+                  .where((c) => (gam.starsPerCharacter[c] ?? 0) > 0)
+                  .length;
+              final unlocked = practiced >= 5; // unlock after 10 letters
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: GestureDetector(
+                  onTap: () {
+                    if (unlocked) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const WordSelectionScreen(),
+                        ),
+                      );
+                    } else {
+                      // Show how many more letters needed
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Practice ${10 - practiced} more letters to unlock Level 2! ⭐',
+                            style: GoogleFonts.nunito(
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
+                          backgroundColor: AppTheme.primaryPurple,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: unlocked
+                          ? AppTheme.accentGreen
+                          : AppTheme.textMuted.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: unlocked
+                          ? [
+                              BoxShadow(
+                                color: AppTheme.accentGreen
+                                    .withValues(alpha: 0.35),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ]
+                          : [],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          unlocked ? '✏️' : '🔒',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Level 2',
+                          style: GoogleFonts.nunito(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: unlocked
+                                ? Colors.white
+                                : AppTheme.textMuted,
+                          ),
+                        ),
+                        if (unlocked) ...[
+                          const SizedBox(width: 4),
+                          const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: CustomPaint(
         painter: BubbleBackgroundPainter(),
@@ -62,8 +158,10 @@ class CharacterSelectionScreen extends StatelessWidget {
               Expanded(
                 child: Consumer<GamificationService>(
                   builder: (context, gam, _) => GridView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 8),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 4,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
@@ -173,8 +271,10 @@ class _LevelBar extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: gam.levelProgress,
                       minHeight: 8,
-                      backgroundColor: AppTheme.primaryPurple.withValues(alpha: 0.15),
-                      valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.primaryPurple),
+                      backgroundColor:
+                          AppTheme.primaryPurple.withValues(alpha: 0.15),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppTheme.primaryPurple),
                     ),
                   ),
                 ],
@@ -185,7 +285,7 @@ class _LevelBar extends StatelessWidget {
             // Star count
             Column(
               children: [
-                const Text('\u2B50', style: TextStyle(fontSize: 22)),
+                const Text('⭐', style: TextStyle(fontSize: 22)),
                 Text(
                   '${gam.totalStars}',
                   style: GoogleFonts.nunito(
@@ -229,7 +329,8 @@ class _BuddyPicker extends StatelessWidget {
               final buddy = BuddyData.all[i];
               final selected = gam.selectedBuddyIndex == i;
               return GestureDetector(
-                onTap: () => context.read<GamificationService>().selectBuddy(i),
+                onTap: () =>
+                    context.read<GamificationService>().selectBuddy(i),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 220),
                   width: 48,
@@ -316,7 +417,9 @@ class _LetterCard extends StatelessWidget {
               children: List.generate(
                 3,
                 (i) => Icon(
-                  i < stars ? Icons.star_rounded : Icons.star_outline_rounded,
+                  i < stars
+                      ? Icons.star_rounded
+                      : Icons.star_outline_rounded,
                   size: 14,
                   color: i < stars
                       ? (practiced ? Colors.white : AppTheme.accentYellow)
